@@ -5,25 +5,96 @@
 
 	<style type="text/css">
 
-		/*body {margin:0px; padding:0px;}
+		html, body, div, canvas {margin:0px; padding:0px;}
+		body {width: 100vw; height: 100vh;}
+		#wrapper {
+			/* default this to landscape computer screen */
+			/* TODO: update with js for other screens */
+			width: 50vh; height: 50vh;
+			margin: 20vh auto;
+			border: 2px solid purple;
+		}
 		canvas {
-			width: 100vw; height: 100vh;
-			padding: 0px; margin: 0px;
+			width: 50vh; height: 50vh;
 			cursor: -moz-grab;
 			cursor: -webkit-grab;
 			cursor: grab;
-		}*/
-		html, body { height: 100%; margin: 0; }
-		#viewport { height: 100%; background: #1d1f20;}
+		}
+		/*#viewport { height: 100%; background: #1d1f20;}*/
 
 	</style>
 </head>
 <body>
 
-<canvas id="viewport" width="500" height="500"></canvas>
+<div id="wrapper">
+	<canvas id="viewport" width="500" height="500"></canvas>
+</div>
 
 <script type="text/javascript" src="../src/scripts/physicsjs-full.min.js"></script>
 <script type="text/javascript">
+
+// set up canvas
+const canvasSetup = {
+	init() {
+		this.elem = document.querySelector('canvas');
+		this.resize();
+		window.addEventListener("resize", () => canvas.resize(), false);
+		return {
+			width: this.elem.width = this.elem.offsetWidth,
+			height: this.elem.height = this.elem.offsetHeight
+		}
+	},
+	resize() {
+		this.width = this.elem.width = this.elem.offsetWidth;
+		this.height = this.elem.height = this.elem.offsetHeight;
+	}
+}
+const canvas = canvasSetup.init();
+console.log(canvas.height);
+
+
+window.addEventListener("mousedown", function(md) {
+  if (md.which == 1) {
+    lastX = event.pageX;
+    addEventListener("mousemove", moved);
+    md.preventDefault(); // Prevent selection
+  }
+});
+window.addEventListener("mouseup", function(mu) {
+	console.log(mu)
+	removeEventListener("mousemove", moved);
+}, false)
+
+// function buttonPressed(event) {
+//   if (event.buttons == null)
+//     return event.which != 0;
+//   else
+//     return event.buttons != 0;
+// }
+
+var lastX; // Tracks the last observed mouse X position
+function moved(event) {
+	var dist = event.pageX - lastX;
+	console.log(dist);
+	document.querySelector('canvas').style.transform = 'rotate('+dist+'deg)';
+ //  var newWidth = Math.max(10, rect.offsetWidth + dist);
+ //  rect.style.width = newWidth + "px";
+ //  lastX = event.pageX;
+
+ console.log(event);
+
+
+}
+
+// window.addEventListener("mousedown", function(md) {
+// 	window.addEventListener("mousemove", function(mm) {
+// 		console.log(mm);
+
+// 		window.addEventListener("mouseup", function(mu) {
+// 			mm.preventDefault();
+// 		}, false) // mu
+// 	}, false) // mm
+// }, false) // md
 
 Physics(function(world){
 
@@ -95,9 +166,6 @@ Physics(function(world){
 	world.add( Physics.behavior('body-impulse-response') );
 	world.add( Physics.behavior('body-collision-detection') );
 	world.add( Physics.behavior('sweep-prune') );
-
-
-
 
   // code...
 });
