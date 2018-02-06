@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  {{>head title=site.title summary=site.description}}
+
+  <body>
+    {{> header }}
+
+    <div class="container">
+      <div class="home">
+
+        <ul class="post-list">
+          {{#each collections.toys }}
+            <li>
+              <article class="post">
+                <h2 class="post-title">
+                  <a class="post-link" href="/{{ this.path }}">{{ this.title }}</a>
+                </h2>
+
+                <div class="post-meta feather_type">
+                  <span>
+                    <time datetime="{{moment this.date 'YYYY-MM-DD' }}">
+                      {{moment this.date 'dddd, Do MMMM YYYY' }}
+                    </time>
+                  </span>
+                </div>
+
+                <div class="post-preview">{{{ markdown this.summary }}}</div>
+              </article>
+            </li>
+          {{/each}}
+        </ul>
+
+      </div>
+      {{> footer }}
+    </div>
+  </body>
+</html>

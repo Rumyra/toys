@@ -1,33 +1,42 @@
 {
+  "private": true,
   "name": "rumyrastoys",
   "version": "1.0.0",
-  "description": "Rumyra\'s toys",
+  "description": "Rumyra's toys",
   "main": "index.js",
   "dependencies": {
-    "handlebars": "^4.0.10",
-    "metalsmith": "^2.3.0",
-    "metalsmith-drafts": "0.0.1",
-    "metalsmith-layouts": "^1.8.1",
-    "metalsmith-markdown": "^0.2.1",
-    "metalsmith-sass": "^1.4.0",
-    "metalsmith-serve": "0.0.7",
-    "metalsmith-watch": "^1.0.3"
+    "compression": "^1.6.2",
+    "express": "^4.13.4",
+    "handlebars": "^4.0.11",
+    "markdown-it-emoji": "^1.1.1",
+    "metalsmith": "^2.1.0",
+    "metalsmith-build-date": "^0.2.0",
+    "metalsmith-collections": "^0.7.0",
+    "metalsmith-define": "^2.0.1",
+    "metalsmith-feed": "^0.2.0",
+    "metalsmith-in-place": "^1.4.4",
+    "metalsmith-layouts": "^1.6.5",
+    "metalsmith-markdownit": "^0.3.0",
+    "metalsmith-pagination": "^1.4.0",
+    "metalsmith-permalinks": "^0.5.0",
+    "metalsmith-sass": "^1.5.1",
+    "moment": "^2.13.0",
+    "striptags": "^2.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@bitbucket.org/Rumyra/pocketpipflatsite.git"
+    "watch": "nodemon --exec npm start -e \"md,html,scss,js\" -i \"build\""
   },
   "keywords": [
-    "health",
-    "diet",
-    "pip",
-    "chat",
-    "app"
+    "toys",
+    "code",
+    "javascript",
+    "web",
+    "audio",
+    "creative"
   ],
   "author": "Ruth John",
   "license": "ISC",

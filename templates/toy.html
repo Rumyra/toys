@@ -1,0 +1,57 @@
+<html lang="en">
+{{> head }}
+<body>
+  {{> header }}
+
+  <div class="container">
+    <header>{{ title }}</header>
+
+    <div class="post-body" itemprop="articleBody">
+      {{{ contents }}}
+    </div>
+
+    <div class="center">
+      {{> share shareText='Share this post'}}
+    </div>
+
+    {{> footer }}
+  </div>
+
+  <link rel="stylesheet" href="/css/zenburn.css" async defer>
+  <script type="text/javascript" src="/js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script id="twitter-wjs" src="https://platform.twitter.com/widgets.js"></script>
+  <script>
+    var tweets = document.querySelectorAll(".tweet");
+    for(var i=0; i<tweets.length; i++) {
+      var tweet = tweets[i];
+      var id = tweet.getAttribute("tweetID");
+
+      twttr.widgets.createTweet(
+        id, tweet,
+        {
+          conversation : 'none',
+          cards: 'visible',
+          linkColor: '#cc0000',
+          theme: 'light',
+          align: 'center'
+        });
+    }
+
+  </script>
+  <script>
+    // if (navigator.share) {
+    //   [].slice.call(document.querySelectorAll('.share')).forEach(function(shareButton) {
+    //     shareButton.classList.add('show');
+    //     shareButton.addEventListener('click', function(event) {
+    //       event.preventDefault();
+    //       navigator.share({
+    //         title: document.title,
+    //         url: window.location.href
+    //       });
+    //     });
+    //   });
+    // }
+  </script>
+</body>
+</html>

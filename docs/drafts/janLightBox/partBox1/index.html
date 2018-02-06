@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+	<style type="text/css">
+
+		body {margin:0px; padding:0px;}
+		canvas {
+			width: 100vw; height: 100vh;
+			padding: 0px; margin: 0px;
+		}
+
+	</style>
+</head>
+<body>
+
+<canvas></canvas>
+
+<script type="text/javascript">
+
+	// this is based upon this pen: https://codepen.io/ge1doot/pen/ZyLzjg I made this decision rather than coding from scratch as I am not too familiar with js classes and I thought this would help me learn a bit. I usually code from scratch and it takes me forever, and I don't necessarily learn many new things. I'm taking a different approach
+
+	"use strict";
+
+	// not really sure what the grid is for - I have a feeling I don't need this, but I might try to remove it after...
+	class Grid {
+		constructor(maxParticlesPerCell) {
+			this.max = maxParticlesPerCell;
+		}
+		initSize(width, height, size) {
+			this.width = (2 + width / size) | 0;
+			this.height = (2 + height / size) | 0;
+			this.size = size;
+			this.cells = new Array(this.width * this.height * this.max);
+			this.cellsSize = new Uint8Array(this.width * this.height);
+		}
+		fill(particles) {
+			for (let p of particles) {
+				const index =
+					((1 + p.y / this.size) | 0) * this.width + ((1 + p.x / this.size) | 0);
+				if (this.cellsSize[index] < this.max) {
+					const cellPos = this.cellsSize[index]++;
+					this.cells[index * this.max + cellPos] = p;
+				}
+			}
+		}
+		update(particles) {
+			for (let i = 0; i < this.width * this.height; ++i) {
+				for (let j = 0; j < this.cellsSize[i]; ++j) {
+					const p = this.cells[i * this.max + j];
+					const index =
+						((1 + p.y / this.size) | 0) * this.width + ((1 + p.x / this.size) | 0);
+					if (index !== i && this.cellsSize[index] < this.max) {
+						this.cells[index * this.max + this.cellsSize[index]++] = p;
+						this.cells[i * this.max + j] = this.cells[
+							i * this.max + --this.cellsSize[i]
+						];
+					}
+				}
+			}
+		}
+	} // grid
+
+	class Particle {
+		constructor(x, y) {
+			this.x = x;
+			this.y = y;
+			this.px = x;
+			this.py = y;
+		}
+		integrate() {
+			container.limit(this);
+			// if pointer is down rotate container?
+
+			const x = this.x;
+			const y = this.y;
+			this.x += x - this.px;
+			this.y += y - this.py + kGravity;
+			this.px = x;
+			this.py = y;
+		}
+		fluid() {
+			// Ref Grant Kot Material Point Method http://grantkot.com/
+			let pressure = 0;
+			let presnear = 0;
+			const neighbors = [];
+			// what are xc & xy?
+			const xc = (1 + this.x / grid.size) | 0;
+			const yc = (1 + this.y / grid.size) | 0;
+			// adding something to neighbours array
+			for (let x = xc - 1; x < xc + 2; ++x) {
+				for (let y = yc - 1; y < yc + 2; ++y) {
+					const index = y * grid.width + x;
+					for (
+						let k = grid.max * index, end = k + grid.cellsSize[index];
+						k < end;
+						++k
+					) {
+						// what is a grid cell?
+						const pn = grid.cells[k];
+						if (pn !== this) {
+							const vx = pn.x - this.x;
+							const vy = pn.y - this.y;
+							// s length
+							const slen = vx * vx + vy * vy;
+							if (slen < kRadius * kRadius) {
+								const vlen = slen ** 0.5;
+								const q = 1.0 - vlen / kRadius;
+								pressure += q * q;
+								presnear += q * q * q;
+								neighbors.push(new Contact(pn, q, vx / vlen * q, vy / vlen * q));
+							}
+						}
+					}
+				}
+			}
+			pressure = (pressure - kDensity) * 1.0;
+			presnear *= 0.5;
+			// for each neighbour - each prop is set above
+			for (let p of neighbors) {
+				const pr = pressure + presnear * p.q;
+				const dx = p.vx * pr;
+				const dy = p.vy * pr;
+				p.n.x += dx;
+				p.n.y += dy;
+				this.x -= dx;
+				this.y -= dy;
+				// I don't think I need the line to - which means I don't need p.n.x etc...
+				if (p.q > kRendering) {
+					ctx.moveTo(this.x, this.y);
+					ctx.lineTo(p.n.x, p.n.y);
+				}
+			}
+		} // fluid
+
+	} // Particle
+	// this is getting pushed to the array above ^^
+	class Contact {
+		constructor(n, q, vx, vy) {
+			this.n = n;
+			this.q = q;
+			this.vx = vx;
+			this.vy = vy;
+		}
+	}
+
+	// I don't understand why this is an object and not a class
+	const container = {
+		init(scale, width, height) {
+			this.width = width;
+			this.height = height;
+			this.ai = 0;
+			this.scale = scale;
+			this.borders = [
+				new this.Plane(),
+				new this.Plane(),
+				new this.Plane(),
+				new this.Plane()
+			];
+			// this.setBounds();
+		},
+		Plane: class {
+			constructor() {
+				this.x = 0;
+				this.y = 0;
+				this.d = 0;
+			}
+			distanceToPlane(p) {
+				// I'm guessing position of thing, but why do we care about both sides?
+				return (
+					(p.x - canvas.width * 0.5) * this.x +
+					(p.y - canvas.height * 0.5) * this.y +
+					this.d
+				);
+			}
+			update(x, y, d) {
+				this.x = x;
+				this.y = y;
+				this.d = d;
+			}
+		},
+		setBounds() {
+			const w = this.width;
+			const h = this.height;
+			const s = this.scale;
+
+			this.borders[0].update( -w/2, 0, -h * s );
+			this.borders[1].update( 0, 0, -w * s);
+			this.borders[2].update( -w/2, -h/2, -w * s);
+			this.borders[3].update( 0, -h/2, -h * s);
+
+			// ctx.save();
+			ctx.fillStyle = "#fff";
+			ctx.translate(w * 0.5, h * 0.5);
+			ctx.fillRect(-w * s, -h * s, w * s * 2, h * s * 2);
+			// ctx.restore();
+		},
+		rotate() {
+			const w = canvas.width;
+			const h = canvas.height;
+			const s = this.scale;
+			// what is ai
+
+			// here we can change angle to be drag or device orientation
+			const angle = Math.sin((this.ai += pointer.isDown ? 0 : 0.05)) * s * Math.min(1.0, h / w);
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			this.borders[0].update(-sin, cos, -h * s);
+			this.borders[1].update(cos, sin, -w * s);
+			this.borders[2].update(-cos, -sin, -w * s);
+			this.borders[3].update(sin, -cos, -h * s);
+			ctx.save();
+			ctx.fillStyle = "#fff";
+			ctx.translate(w * 0.5, h * 0.5);
+			ctx.rotate(angle);
+			ctx.fillRect(-w * s, -h * s, w * s * 2, h * s * 2);
+			ctx.restore();
+		},
+		limit(p, radius = 0) {
+			// so for each border
+			for (let b of this.borders) {
+				// but then what is plane??
+				let d = b.distanceToPlane(p) + radius + 0;
+				if (d > 0) {
+					p.x += b.x * -d + (Math.random() * 0.1 - 0.05);
+					p.y += b.y * -d + (Math.random() * 0.1 - 0.05);
+				}
+			}
+		}
+	};
+
+	// canvas stuff - pretty straight forward
+	const canvas = {
+		init() {
+			this.elem = document.querySelector('canvas');
+			this.resize();
+			window.addEventListener("resize", () => canvas.resize(), false);
+			return this.elem.getContext("2d", { alpha: false });
+		},
+		resize() {
+			this.width = this.elem.width = this.elem.offsetWidth;
+			this.height = this.elem.height = this.elem.offsetHeight;
+			kRadius = Math.round(0.04 * Math.sqrt(this.width * this.height));
+			grid.initSize(this.width, this.height, kRadius);
+			grid.fill(particles);
+			// if (sun) sun.r = 1.5 * kRadius;
+		}
+	};
+
+	// should integrate device orientation into this I think
+	const pointer = {
+		init(canvas) {
+			this.x = this.ex = 0;
+			this.y = this.ey = 2000;
+			this.isDown = false;
+			window.addEventListener("mousemove", e => this.move(e, false), false);
+			canvas.elem.addEventListener("touchmove", e => this.move(e, true), false);
+			window.addEventListener("mousedown", e => this.down(e, false), false);
+			window.addEventListener("touchstart", e => this.down(e, true), false);
+			window.addEventListener("mouseup", e => this.up(e, false), false);
+			window.addEventListener("touchend", e => this.up(e, true), false);
+		},
+		move(e, touch) {
+			if (touch) {
+				e.preventDefault();
+				this.x = e.targetTouches[0].clientX;
+				this.y = e.targetTouches[0].clientY;
+			} else {
+				this.x = e.clientX;
+				this.y = e.clientY;
+			}
+		},
+		down(e, touch) {
+			this.isDown = true;
+			this.move(e, touch);
+			// if (touch) sun.anim();
+			// if (sun.over) {
+			// 	sun.drag = true;
+			// 	this.ex = this.x;
+			// 	this.ey = this.y;
+			// 	sun.dx = sun.x - this.ex;
+			// 	sun.dy = sun.y - this.ey;
+			// 	if (!touch) canvas.elem.style.cursor = "move";
+			// }
+		},
+		up(e, touch) {
+			this.isDown = false;
+			if (!touch) canvas.elem.style.cursor = "crosshair";
+			// sun.drag = false;
+			// sun.over = false;
+		},
+		ease(n) {
+			this.ex += (this.x - this.ex) * n;
+			this.ey += (this.y - this.ey) * n;
+		}
+	}; // pointer
+
+	const initParticles = num => {
+		const s = container.scale;
+		let x = canvas.width * s * 0.5;
+		let y = canvas.height * s * 0.5;
+		for (let i = 0; i < num; ++i) {
+			particles.push(new Particle(x, y));
+			x += kRadius / 2.5;
+			if (x > canvas.width * (1 - s * 0.5)) {
+				x = canvas.width * s * 0.5;
+				y += kRadius / 3;
+			}
+		}
+		grid.fill(particles);
+	}
+	// let sun;
+	let kRadius;
+	const particles = [];
+	const grid = new Grid(100);
+	const ctx = canvas.init();
+	pointer.init(canvas);
+	// passing in scale here
+	container.init(0.35, canvas.width, canvas.height);
+	const kGravity = 0.04;
+	const kDensity = 3;
+	const kRendering = 0.45;
+	initParticles(1200);
+	// sun = new Circle(
+	// 	canvas.width * 0.5,
+	// 	canvas.height * 0.5 - kRadius,
+	// 	1.5 * kRadius
+	// );
+	const run = () => {
+		requestAnimationFrame(run);
+		ctx.fillStyle = "#bebebf";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		pointer.ease(0.25);
+		container.setBounds();
+		for (let p of particles) p.integrate();
+		grid.update(particles);
+		ctx.beginPath();
+		ctx.strokeStyle = "#556";
+		for (let p of particles) p.fluid();
+		ctx.stroke();
+		// sun.anim();
+	};
+	run();
+
+
+
+// //https://codepen.io/ge1doot/pen/ZyLzjg
+// "use strict";
+// {
+// 	class Grid {
+// 		constructor(maxParticlesPerCell) {
+// 			this.max = maxParticlesPerCell;
+// 		}
+// 		initSize(width, height, size) {
+// 			this.width = (2 + width / size) | 0;
+// 			this.height = (2 + height / size) | 0;
+// 			this.size = size;
+// 			this.cells = new Array(this.width * this.height * this.max);
+// 			this.cellsSize = new Uint8Array(this.width * this.height);
+// 		}
+// 		fill(particles) {
+// 			for (let p of particles) {
+// 				const index =
+// 					((1 + p.y / this.size) | 0) * this.width + ((1 + p.x / this.size) | 0);
+// 				if (this.cellsSize[index] < this.max) {
+// 					const cellPos = this.cellsSize[index]++;
+// 					this.cells[index * this.max + cellPos] = p;
+// 				}
+// 			}
+// 		}
+// 		update(particles) {
+// 			for (let i = 0; i < this.width * this.height; ++i) {
+// 				for (let j = 0; j < this.cellsSize[i]; ++j) {
+// 					const p = this.cells[i * this.max + j];
+// 					const index =
+// 						((1 + p.y / this.size) | 0) * this.width + ((1 + p.x / this.size) | 0);
+// 					if (index !== i && this.cellsSize[index] < this.max) {
+// 						this.cells[index * this.max + this.cellsSize[index]++] = p;
+// 						this.cells[i * this.max + j] = this.cells[
+// 							i * this.max + --this.cellsSize[i]
+// 						];
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	class Contact {
+// 		constructor(n, q, vx, vy) {
+// 			this.n = n;
+// 			this.q = q;
+// 			this.vx = vx;
+// 			this.vy = vy;
+// 		}
+// 	}
+// 	class Particle {
+// 		constructor(x, y) {
+// 			// set up some x & y stuff
+// 			this.x = x;
+// 			this.y = y;
+// 			this.px = x;
+// 			this.py = y;
+// 		}
+// 		turbine() {
+// 			// this is the turbine so I don't need it, but I would like to know what d is
+// 			const dx = pointer.x - this.x;
+// 			const dy = pointer.y - this.y;
+// 			const d = Math.sqrt(dx * dx + dy * dy);
+// 			if (d < 2 * kRadius) {
+// 				const angle = Math.atan2(dy, dx) + kRadius / (d + 1);
+// 				this.x += Math.cos(angle);
+// 				this.y += Math.sin(angle);
+// 			}
+// 		}
+// 		integrate() {
+// 			sun.collide(this);
+// 			// ok I defo need container limit
+// 			container.limit(this);
+// 			// so I need a pointer and a mover for acceleromters
+// 			if (pointer.isDown && !sun.drag) this.turbine();
+// 			const x = this.x;
+// 			const y = this.y;
+// 			// is px & py the width of the particle maybe?
+// 			this.x += x - this.px;
+// 			this.y += y - this.py + kGravity;
+// 			this.px = x;
+// 			this.py = y;
+// 		}
+// 		fluid() {
+// 			// Ref Grant Kot Material Point Method http://grantkot.com/
+// 			let pressure = 0;
+// 			let presnear = 0;
+// 			const neighbors = [];
+// 			const xc = (1 + this.x / grid.size) | 0;
+// 			const yc = (1 + this.y / grid.size) | 0;
+// 			for (let x = xc - 1; x < xc + 2; ++x) {
+// 				for (let y = yc - 1; y < yc + 2; ++y) {
+// 					const index = y * grid.width + x;
+// 					for (
+// 						let k = grid.max * index, end = k + grid.cellsSize[index];
+// 						k < end;
+// 						++k
+// 					) {
+// 						const pn = grid.cells[k];
+// 						if (pn !== this) {
+// 							const vx = pn.x - this.x;
+// 							const vy = pn.y - this.y;
+// 							const slen = vx * vx + vy * vy;
+// 							if (slen < kRadius * kRadius) {
+// 								const vlen = slen ** 0.5;
+// 								const q = 1.0 - vlen / kRadius;
+// 								pressure += q * q;
+// 								presnear += q * q * q;
+// 								neighbors.push(new Contact(pn, q, vx / vlen * q, vy / vlen * q));
+// 							}
+// 						}
+// 					}
+// 				}
+// 			}
+// 			pressure = (pressure - kDensity) * 1.0;
+// 			presnear *= 0.5;
+// 			for (let p of neighbors) {
+// 				const pr = pressure + presnear * p.q;
+// 				const dx = p.vx * pr;
+// 				const dy = p.vy * pr;
+// 				p.n.x += dx;
+// 				p.n.y += dy;
+// 				this.x -= dx;
+// 				this.y -= dy;
+// 				if (p.q > kRendering) {
+// 					ctx.moveTo(this.x, this.y);
+// 					ctx.lineTo(p.n.x, p.n.y);
+// 				}
+// 			}
+// 		}
+// 	}
+// 	// I don't need this, this is for the sun
+// 	class Circle {
+// 		constructor(x, y, r) {
+// 			this.x = x;
+// 			this.y = y;
+// 			this.px = x;
+// 			this.py = y;
+// 			this.dx = 0;
+// 			this.dy = 0;
+// 			this.r = r;
+// 			this.drag = false;
+// 			this.over = false;
+// 		}
+// 		anim() {
+// 			const dx = pointer.x - this.x;
+// 			const dy = pointer.y - this.y;
+// 			if (Math.sqrt(dx * dx + dy * dy) < this.r) {
+// 				if (!this.over) {
+// 					this.over = true;
+// 					canvas.elem.style.cursor = "pointer";
+// 				}
+// 			} else {
+// 				if (this.over && !this.drag) {
+// 					this.over = false;
+// 					canvas.elem.style.cursor = "crosshair";
+// 				}
+// 			}
+// 			if (this.drag) {
+// 				this.x = pointer.ex + this.dx;
+// 				this.y = pointer.ey + this.dy;
+// 			}
+// 			container.limit(this, this.r);
+// 			const x = this.x;
+// 			const y = this.y;
+// 			this.x += this.x - this.px;
+// 			this.y += this.y - this.py + 2 * kGravity;
+// 			this.px = x;
+// 			this.py = y;
+// 			ctx.beginPath();
+// 			ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+// 			ctx.fillStyle = "#334";
+// 			ctx.fill();
+// 		}
+// 		collide(p) {
+// 			const dx = p.x - this.x;
+// 			const dy = p.y - this.y;
+// 			const dist = Math.sqrt(dx * dx + dy * dy);
+// 			if (dist < this.r * 1.2) {
+// 				const fx = dx / dist;
+// 				const fy = dy / dist;
+// 				p.x += fx;
+// 				p.y += fy;
+// 				this.x -= 0.01 * fx;
+// 				this.y -= 0.01 * (fy + 2 * Math.abs(fy));
+// 			}
+// 		}
+// 	}
+// 	const container = {
+// 		init(scale) {
+// 			this.ai = 0;
+// 			this.scale = scale;
+// 			this.borders = [
+// 				new this.Plane(),
+// 				new this.Plane(),
+// 				new this.Plane(),
+// 				new this.Plane()
+// 			];
+// 		},
+// 		Plane: class {
+// 			constructor() {
+// 				this.x = 0;
+// 				this.y = 0;
+// 				this.d = 0;
+// 			}
+// 			distanceToPlane(p) {
+// 				return (
+// 					(p.x - canvas.width * 0.5) * this.x +
+// 					(p.y - canvas.height * 0.5) * this.y +
+// 					this.d
+// 				);
+// 			}
+// 			update(x, y, d) {
+// 				this.x = x;
+// 				this.y = y;
+// 				this.d = d;
+// 			}
+// 		},
+// 		rotate() {
+// 			const w = canvas.width;
+// 			const h = canvas.height;
+// 			const s = this.scale;
+// 			const angle = Math.sin((this.ai += pointer.isDown ? 0 : 0.05)) * s * Math.min(1.0, h / w);
+// 			const cos = Math.cos(angle);
+// 			const sin = Math.sin(angle);
+// 			this.borders[0].update(-sin, cos, -h * s);
+// 			this.borders[1].update(cos, sin, -w * s);
+// 			this.borders[2].update(-cos, -sin, -w * s);
+// 			this.borders[3].update(sin, -cos, -h * s);
+// 			ctx.save();
+// 			ctx.fillStyle = "#fff";
+// 			ctx.translate(w * 0.5, h * 0.5);
+// 			ctx.rotate(angle);
+// 			ctx.fillRect(-w * s, -h * s, w * s * 2, h * s * 2);
+// 			ctx.restore();
+// 		},
+// 		limit(p, radius = 0) {
+// 			for (let b of this.borders) {
+// 				let d = b.distanceToPlane(p) + radius + 0;
+// 				if (d > 0) {
+// 					p.x += b.x * -d + (Math.random() * 0.1 - 0.05);
+// 					p.y += b.y * -d + (Math.random() * 0.1 - 0.05);
+// 				}
+// 			}
+// 		}
+// 	};
+// 	const canvas = {
+// 		init() {
+// 			this.elem = document.querySelector('canvas');
+// 			this.resize();
+// 			window.addEventListener("resize", () => canvas.resize(), false);
+// 			return this.elem.getContext("2d", { alpha: false });
+// 		},
+// 		resize() {
+// 			this.width = this.elem.width = this.elem.offsetWidth;
+// 			this.height = this.elem.height = this.elem.offsetHeight;
+// 			kRadius = Math.round(0.04 * Math.sqrt(this.width * this.height));
+// 			grid.initSize(this.width, this.height, kRadius);
+// 			grid.fill(particles);
+// 			if (sun) sun.r = 1.5 * kRadius;
+// 		}
+// 	};
+// 	const pointer = {
+// 		init(canvas) {
+// 			this.x = this.ex = 0;
+// 			this.y = this.ey = 2000;
+// 			this.isDown = false;
+// 			window.addEventListener("mousemove", e => this.move(e, false), false);
+// 			canvas.elem.addEventListener("touchmove", e => this.move(e, true), false);
+// 			window.addEventListener("mousedown", e => this.down(e, false), false);
+// 			window.addEventListener("touchstart", e => this.down(e, true), false);
+// 			window.addEventListener("mouseup", e => this.up(e, false), false);
+// 			window.addEventListener("touchend", e => this.up(e, true), false);
+// 		},
+// 		move(e, touch) {
+// 			if (touch) {
+// 				e.preventDefault();
+// 				this.x = e.targetTouches[0].clientX;
+// 				this.y = e.targetTouches[0].clientY;
+// 			} else {
+// 				this.x = e.clientX;
+// 				this.y = e.clientY;
+// 			}
+// 		},
+// 		down(e, touch) {
+// 			this.isDown = true;
+// 			this.move(e, touch);
+// 			if (touch) sun.anim();
+// 			if (sun.over) {
+// 				sun.drag = true;
+// 				this.ex = this.x;
+// 				this.ey = this.y;
+// 				sun.dx = sun.x - this.ex;
+// 				sun.dy = sun.y - this.ey;
+// 				if (!touch) canvas.elem.style.cursor = "move";
+// 			}
+// 		},
+// 		up(e, touch) {
+// 			this.isDown = false;
+// 			if (!touch) canvas.elem.style.cursor = "crosshair";
+// 			sun.drag = false;
+// 			sun.over = false;
+// 		},
+// 		ease(n) {
+// 			this.ex += (this.x - this.ex) * n;
+// 			this.ey += (this.y - this.ey) * n;
+// 		}
+// 	};
+// 	const initParticles = num => {
+// 		const s = container.scale;
+// 		let x = canvas.width * s * 0.5;
+// 		let y = canvas.height * s * 0.5;
+// 		for (let i = 0; i < num; ++i) {
+// 			particles.push(new Particle(x, y));
+// 			x += kRadius / 2.5;
+// 			if (x > canvas.width * (1 - s * 0.5)) {
+// 				x = canvas.width * s * 0.5;
+// 				y += kRadius / 3;
+// 			}
+// 		}
+// 		grid.fill(particles);
+// 	}
+// 	let sun;
+// 	let kRadius;
+// 	const particles = [];
+// 	const grid = new Grid(100);
+// 	const ctx = canvas.init();
+// 	pointer.init(canvas);
+// 	container.init(0.35);
+// 	const kGravity = 0.04;
+// 	const kDensity = 3;
+// 	const kRendering = 0.45;
+// 	initParticles(1200);
+// 	sun = new Circle(
+// 		canvas.width * 0.5,
+// 		canvas.height * 0.5 - kRadius,
+// 		1.5 * kRadius
+// 	);
+// 	const run = () => {
+// 		requestAnimationFrame(run);
+// 		ctx.fillStyle = "#bebebf";
+// 		ctx.fillRect(0, 0, canvas.width, canvas.height);
+// 		pointer.ease(0.25);
+// 		container.rotate();
+// 		for (let p of particles) p.integrate();
+// 		grid.update(particles);
+// 		ctx.beginPath();
+// 		ctx.strokeStyle = "#556";
+// 		for (let p of particles) p.fluid();
+// 		ctx.stroke();
+// 		sun.anim();
+// 	};
+// 	run();
+// }
+
+
+
+</script>
+</body>
+</html>

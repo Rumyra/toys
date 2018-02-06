@@ -1,7 +1,7 @@
 ---
 title: Rumyra's Toys 2018
 draft: false
-layout: layout.html
+layout: index.html
 ---
 
 TL:DR; I met Nadiah, she was working on DataVis at the time. I loved the idea of doing something repetitively along a theme as a aide project for creativity, so I have been influenced by that. 12 months, 12 things. Although I haven't thought of a theme yet. I'm hoping one will emerge!
