@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Four Sounds</title>
+</head>
+<body>
+
+	<audio src="140_A_Arps_SP_01.wav" data-mute="true" loop></audio>
+	<audio src="140_A_Arps_SP_01.wav" data-mute="true" loop></audio>
+	<audio src="140_A_Arps_SP_01.wav" data-mute="true" loop></audio>
+	<audio src="140_A_Arps_SP_01.wav" data-mute="true" loop></audio>
+
+	<button data-track="0">Play 1</button>
+	<button data-track="1">Play 2</button>
+	<button data-track="2">Play 3</button>
+	<button data-track="3">Play 4</button>
+
+<script type="text/javascript">
+
+	// we need new audio context
+	const ctx = new window.AudioContext;
+
+	// we need all the audio tracks
+	const audioTrackEls = document.querySelectorAll('audio');
+	// and buttons
+	const buttonEls = document.querySelectorAll('button');
+
+	// when we create sources & gain nodes we're gonna push them into an array
+	const sources = [];
+	const gainNodes = [];
+	// all audio is gonna start on first click
+	var firstClick = true;
+
+	// TODO test audio files have loaded
+	audioTrackEls.forEach(function(el,i) {
+		sources[i] = ctx.createMediaElementSource(el);
+		gainNodes[i] = ctx.createGain();
+		gainNodes[i].gain.value = 0;
+		sources[i].connect(gainNodes[i]).connect(ctx.destination);
+	})
+
+	buttonEls.forEach(function(el,i) {
+		el.addEventListener('click', function(e) {
+			const trackNum = parseInt(this.dataset.track);
+			console.log(trackNum);
+			if (firstClick) {
+				// start all tracks but with gain at zero, _apart_ from the track you clicked
+				gainNodes[trackNum].gain.value = 0.5;
+				audioTrackEls[trackNum].dataset.mute = 'false';
+				audioTrackEls.forEach(function(el,i) {
+					audioTrackEls[i].play();
+				})
+				firstClick = false;
+			} else {
+				// if track is playing mute it, if not unmute it
+				if (audioTrackEls[trackNum].dataset.mute === 'false') {
+					gainNodes[trackNum].gain.value = 0;
+					audioTrackEls[trackNum].dataset.mute = 'true';
+				} else {
+					gainNodes[trackNum].gain.value = 0.5;
+					audioTrackEls[trackNum].dataset.mute = 'false';
+				}
+
+			}
+		}, false);
+	})
+
+	// src = ctx.createMediaElementSource(audioTrackEls[0]);
+	// gn = ctx.createGain();
+	// gn.gain.value = 0.5;
+	// src.connect(gn).connect(ctx.destination);
+	// window.addEventListener('click', function(e) {
+
+	// 	audioTrackEls[0].play();
+	// 	audioTrackEls[1].play();
+	// 	audioTrackEls[2].play();
+	// 	audioTrackEls[3].play();
+	// }, false);
+
+
+</script>
+</body>
+</html>

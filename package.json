@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "watch": "nodemon --exec npm start -e \"md,html,scss,js\" -i \"build\""
+    "watch": "nodemon --exec npm start -e \"md,html,scss,js\" -i \"docs\""
   },
   "keywords": [
     "toys",

@@ -10,9 +10,11 @@
 <script type="text/javascript">
 
 window.onload = function() {
-  var game = new Phaser.Game(400, 400, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+  var game = new Phaser.Game(400, 400, Phaser.CANVAS, '', { preload: preload, create: create, update: update });
 
   var emitter;
+  var box;
+  var line;
 
   this.addEventListener("mousedown", function(md) {
 	  if (md.which == 1) {
@@ -30,7 +32,7 @@ window.onload = function() {
 	function moved(event) {
 		var dist = event.pageX - lastX;
 		console.log(dist);
-		game.world.rotation += 0.05;
+		game.world.rotation += 0.03;
 	 //  var newWidth = Math.max(10, rect.offsetWidth + dist);
 	 //  rect.style.width = newWidth + "px";
 	 //  lastX = event.pageX;
@@ -47,6 +49,11 @@ window.onload = function() {
   function create () {
 
     // game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.world.setBounds(-200,-200,400,400);
+
+    // box = new Phaser.Rectangle(10,50,80,50);
+    line = new Phaser.Line(300, 300, 200, 200);
+
 
     emitter = game.add.emitter(game.world.centerX, 0, 88);
     // area, bounce, alpha, children, gravity, lifespan(0), maxParticleSpeed,
@@ -70,7 +77,6 @@ window.onload = function() {
     // explode, lifespan, frequncy, quantity, forceQuantity
     emitter.start(true, 0, 0, 88, 88);
 
-    game.world.rotation = 45;
 
   }
 
