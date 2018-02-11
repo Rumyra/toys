@@ -32,6 +32,9 @@
 	var firstClick = true;
 
 	// TODO test audio files have loaded
+
+	// set up sources & gain nodes for each track
+	// also connect our audio graph
 	audioTrackEls.forEach(function(el,i) {
 		sources[i] = ctx.createMediaElementSource(el);
 		gainNodes[i] = ctx.createGain();
@@ -39,6 +42,7 @@
 		sources[i].connect(gainNodes[i]).connect(ctx.destination);
 	})
 
+	// when each button is click play or mute our sounds
 	buttonEls.forEach(function(el,i) {
 		el.addEventListener('click', function(e) {
 			const trackNum = parseInt(this.dataset.track);
@@ -64,18 +68,6 @@
 			}
 		}, false);
 	})
-
-	// src = ctx.createMediaElementSource(audioTrackEls[0]);
-	// gn = ctx.createGain();
-	// gn.gain.value = 0.5;
-	// src.connect(gn).connect(ctx.destination);
-	// window.addEventListener('click', function(e) {
-
-	// 	audioTrackEls[0].play();
-	// 	audioTrackEls[1].play();
-	// 	audioTrackEls[2].play();
-	// 	audioTrackEls[3].play();
-	// }, false);
 
 
 </script>
