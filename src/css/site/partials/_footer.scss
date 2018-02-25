@@ -1,0 +1,33 @@
+.site__footer {
+  display: block;
+  padding: $verticalSpace 0px 0px;
+  margin: 0px $gutter;
+  border-top: 1px solid $mainCol;
+  text-align: center;
+  ul {
+    @include clearListStyles();
+    display: flex; justify-content:center;
+    @include until($screenMedium) {
+      flex-wrap:wrap;
+    }
+    li {
+      a {
+        border:none; text-decoration:none;
+        svg {
+          width:auto; height:64px;
+          @include until($screenMedium) {height: 54px;}
+          padding:$verticalSpace/2 $gutter/2;
+          @include until($screenSmall) {
+            height: 44px;
+            padding: $verticalSpace/2 $gutter/6;
+          }
+          box-sizing:border-box;
+          path {fill:$offWhite;}
+        }
+        &:hover {
+          svg path {fill:$brand2;}
+        }
+      }
+    }
+  }
+}

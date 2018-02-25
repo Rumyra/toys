@@ -3,36 +3,38 @@
 
   {{>head title=site.title summary=site.description}}
 
-  <body>
-    {{> header }}
+  <body><div class="wrapper">
+    {{> nav }}
 
-    <div class="container">
-      <div class="home">
+    <header class="site__header">
+      <h1>Toybox</h1>
+    </header>
 
-        <ul class="post-list">
-          {{#each collections.toys }}
-            <li>
-              <article class="post">
-                <h2 class="post-title">
-                  <a class="post-link" href="/{{ this.path }}">{{ this.title }}</a>
-                </h2>
-
-                <div class="post-meta feather_type">
-                  <span>
-                    <time datetime="{{moment this.date 'YYYY-MM-DD' }}">
-                      {{moment this.date 'dddd, Do MMMM YYYY' }}
-                    </time>
-                  </span>
-                </div>
-
-                <div class="post-preview">{{{ markdown this.summary }}}</div>
-              </article>
-            </li>
-          {{/each}}
-        </ul>
-
-      </div>
-      {{> footer }}
+    <div class="section__toys">
+      <p style="text-align: center;">Coming Soon</p>
+      <!-- <ul class="toys__list">
+        {{#each pagination.files }}
+        <li class="toy__container"><a class="toy-link" href="/{{ this.path }}">
+          <picture>
+            <source srcset="/images/thumbnails/{{thumbnail}}.webp" type="image/webp">
+            <source srcset="/images/thumbnails/{{thumbnail}}.png" type="image/png">
+            <img src="/images/thumbnails/{{thumbnail}}.png" alt="{{title}}">
+          </picture>
+        </a></li>
+        {{/each}}
+      </ul> -->
     </div>
-  </body>
+
+    <div class="pagination">
+      {{#if pagination.previous}}
+        <a class="pagination--link" href="/{{pagination.previous.path}}">&laquo; Newer Posts</a>
+      {{/if}}
+      {{#if pagination.next}}
+        <a class="pagination--link" href="/{{pagination.next.path}}">Older Posts &raquo;</a>
+      {{/if}}
+    </div>
+
+    {{> footer }}
+
+  </div></body><!-- wrapper -->
 </html>

@@ -61,11 +61,6 @@ Metalsmith(__dirname)
       pattern: 'toys/*',
       sortBy: 'date',
       reverse: true,
-    },
-    drafts: {
-      pattern: 'drafts/*',
-      sortBy: 'date',
-      reverse: true,
     }
   }))
   .use(inplace({
@@ -83,6 +78,18 @@ Metalsmith(__dirname)
         pattern: ':title'
       }
     ]
+  }))
+  .use(pagination({
+    'collections.toys': {
+      perPage: 12,
+      layout: 'index.html',
+      first: 'index.html',
+      noPageOne: true,
+      path: 'page:num/index.html',
+      pageMetadata: {
+        title: 'ToyBox'
+      }
+    }
   }))
   .use(layouts({
     engine: 'handlebars',

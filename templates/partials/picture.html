@@ -1,6 +1,11 @@
-<figure class="center {{ class }}" markdown="1">
-<a href="{{ url}}" target="_blank">
-  <img src="{{url}}" alt="{{ alt }}">
-</a>
+<figure class="{{ class }}" markdown="1">
+{{#if this.caption}}
 <figcaption>{{{ caption }}}</figcaption>
+{{/if}}
+<picture>
+	{{#if this.highRes}}
+	<source srcset="{{highRes}}" media="(min-width: 660px)">
+	{{/if}}
+	<img src="{{url}}" alt="{{ alt }}" />
+</picture>
 </figure>

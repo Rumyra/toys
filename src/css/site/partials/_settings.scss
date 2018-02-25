@@ -1,0 +1,99 @@
+
+// colours
+// sizings
+// fonts
+// breakpoints
+
+// -------------------------- colours
+$blue: hsla(213, 35%, 25%, 1);
+$purple: hsla(302, 15%, 39%, 1);
+$pink: hsla(339, 37%, 55%, 1);
+$peach: hsla(359, 41%, 79%, 1);
+$taupe: hsla(26, 27%, 85%, 1);
+$cream: hsla(47, 45%, 95%, 1);
+$black: hsla(194, 74%, 11%, 1);
+$offWhite: hsla(47, 31%, 98%, 1);
+$brightWhite: hsla(60, 33%, 99%, 1);
+
+$brand1: $cream;
+$brand2: $taupe;
+$brand3: $peach;
+$brand4: $pink;
+$brand5: $purple;
+$brand6: $blue;
+
+$brand_cols: $cream, $taupe, $peach, $pink, $purple;
+
+$mainCol: $offWhite;
+$highlight: $peach;
+
+$white: $brightWhite;
+$black: $black;
+
+$errorColour: $pink;
+$successColour: $blue;
+
+// -------------------------- sizings
+$goldenRatio: 1.618;
+
+// top and bottom space
+$verticalSpace: $goldenRatio*1em !default;
+// left and right space
+$gutter: $goldenRatio*1em !default;
+
+
+// -------------------------- fonts
+@include font-face('Khula', '../fonts/Khula-SemiBold');
+@include font-face('Khula', '../fonts/Khula-Bold', bold);
+
+$font:'Khula', sans-serif !default;
+$fontSize: 1em !default;
+$lineHeight: $goldenRatio !default;
+$letterSpacing: 0.1em;
+
+$headerFont: 'Khula', serif !default;
+$headerLineHeight: 1;
+
+%header {
+	font-family: $headerFont;
+  font-weight: normal;
+  line-height: $headerLineHeight;
+  text-transform: uppercase;
+  letter-spacing: $letterSpacing;
+}
+
+%bigCaps {
+  @extend %header;
+  font-size: $fontSize*$goldenRatio*$goldenRatio;
+}
+
+%smallCaps {
+  @extend %header;
+  font-size: $fontSize;
+}
+
+%readingText {
+	font-family: $font;
+  font-size: $fontSize*$goldenRatio;
+  line-height: $lineHeight;
+  letter-spacing: $letterSpacing;
+}
+
+%normalText {
+	font-family: $font;
+  font-size: $fontSize;
+  line-height: $lineHeight;
+  letter-spacing: $letterSpacing;
+}
+
+
+
+// use with breakpoint mixin like @include until($small) or @include at-least($screenLarge)
+$screenSmall:620px;
+$screenMedium:760px;
+$screenLarge:920px;
+$screenXlarge:1280px;
+
+
+
+

@@ -1,0 +1,85 @@
+// typography
+@mixin font-face($font-family, $file-path, $weight: normal, $style: normal ) {
+  @font-face {
+    font-family: $font-family;
+    font-weight: $weight;
+    font-style: $style;
+      src: url('#{$file-path}.ttf') format('truetype');
+  }
+}
+
+.hide-font {color:transparent; font-size:0px; text-transform:none; text-decoration:none;}
+
+%word-wrap {
+  white-space:pre;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+}
+
+@mixin at-least($device-width) {
+  @media screen and (min-width: $device-width) {
+    @content
+  }
+}
+
+@mixin until($device-width) {
+  @media screen and (max-width: $device-width - 1) {
+    @content
+  }
+}
+
+@mixin simple-vendor-prefix($name, $argument) {
+  -webkit-#{$name}: $argument;
+  -ms-#{$name}: $argument;
+  -moz-#{$name}: $argument;
+  -o-#{$name}: $argument;
+  #{$name}: $argument;
+}
+
+@mixin clearListStyles() {
+  margin: 0px; padding: 0px;
+  border: none; outline: none;
+  list-style: none;
+  li {
+    margin: 0px; padding: 0px;
+  }
+}
+
+@mixin gradient($colOne, $colTwo, $deg) {
+  background-image:
+    linear-gradient($deg, $colOne, $colTwo)
+  ;
+}
+
+@mixin fancyBorder($bordColour, $bkColour) {
+  border: 1px solid $bordColour;
+  box-shadow:
+    inset 0px 0px 0px 3px $bkColour,
+    inset 0px 0px 0px 10px transparentize($bordColour,0.6)
+  ;
+}
+
+@mixin smallFancyBorder($bordColour, $bkColour) {
+  border: 1px solid $bordColour;
+  box-shadow:
+    inset 0px 0px 0px 2px $bkColour,
+    inset 0px 0px 0px 5px transparentize($bordColour,0.6)
+  ;
+}
+
+@mixin partBorder($start, $finish, $colour, $orientation:bottom, $pseudo:before) {
+  position: relative;
+  &:#{$pseudo} {
+    content: "";
+    position: absolute;
+    #{$orientation}: 0;
+    left: $start;
+    right: $finish;
+    height: 1px;
+    background-color: $colour;
+  }
+}
+
+
+

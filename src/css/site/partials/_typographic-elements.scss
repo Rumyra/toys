@@ -1,0 +1,99 @@
+//1. HEADERS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+header {}
+h1 {}
+h2, h3, h4, h5, h6 {
+  margin-bottom: $verticalSpace/2;
+}
+
+h1, h2, .header__main {@extend %bigCaps;}
+h3, h4, .header__sub {@extend %bigCaps;}
+h5, h6, .header__caps {@extend %smallCaps;}
+
+//2. PARAGRAPHS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+p {
+	margin: 0px 0px $verticalSpace;
+	@extend %normalText;
+}
+
+//3. INLINE FORMATTING~~~~~~~~~~~~~~~~~~~~~~~~
+strong, b { font-weight: bold; }
+em, i, dfn, var { font-style: italic; }
+dfn, abbr, abbr[title], ins, mark { border-bottom: 1px dotted $offWhite; }
+small { font-size: 84%; }
+del { text-decoration: line-through; }
+kbd, code, samp, pre { font-family: monospace; font-size: 100%; }
+/*Prevents `sub` and `sup` affecting `line-height` in all browsers.*/
+sub, sup {
+	position: relative;
+	font-size: 84%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+/*changing direction of text dependent on language*/
+[dir="ltr"] bdi { direction: rtl; unicode-bidi: bidi-override; }
+[dir="rtl"] bdi { direction: ltr; unicode-bidi: bidi-override; }
+
+//4. LINKS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a {
+  font-weight:normal; font-size:$fontSize;
+  text-decoration:underline; letter-spacing:$letterSpacing;
+  color: $peach;
+}
+// normalise font size and remove underline for headers
+p a, address a, ul a, ol a, dl a, menu a { font-size: 100%; }
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {font-size: 100%; text-decoration:none;}
+
+a:hover, a:active, a:visited {text-decoration:none;}
+a:focus { outline: thin dotted; }
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover {}
+
+
+//5. BLOCK LEVEL TEXT ELEMENTS~~~~~~~~~~~~~~~~~~~~
+
+//5.1. lists, navs and menus
+ol, ul, dl, menu[type="list"] {margin:$verticalSpace $gutter*2 $verticalSpace*2;}
+ul {list-style:circle inside;}
+ol {list-style-type:lower-roman; margin-left: $gutter*3;}
+li {margin:$verticalSpace/2 0px;}
+ol li {padding-left: $gutter/2;}
+
+dt { font-weight:bold; }
+dl > dd {margin:0px 0px $verticalSpace;}
+
+//5.2. Address & Time
+time {}
+address {display:block; margin:$verticalSpace 0px;}
+//5.3. Quotes
+q {}
+blockquote {
+  margin: $verticalSpace $gutter*4;
+  padding: 0px;
+  quotes:'"';
+  &:before {
+  	float: left;
+    padding-right: $gutter/4;
+  	content:'“';
+    font-size: $fontSize*3;
+  }
+  &:after {
+		content: attr(cite);
+		display: block;
+    font-size: 84%;
+		text-align: right;
+  }
+}
+
+//5.4. Basic styling, see _prism.scss for colours etc... Code -> NB see 3. for <code> */
+pre {
+	margin:0px $gutter*2 $verticalSpace;
+  padding: $verticalSpace $gutter;
+  background-color:#1d1f21;
+  font-size: 100%;
+	color: $white;
+  line-height: $lineHeight;
+  text-shadow: none;
+  @extend %word-wrap;
+	code { background: none; font-size: $fontSize*$goldenRatio;}
+}

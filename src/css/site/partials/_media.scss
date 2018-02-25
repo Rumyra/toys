@@ -1,0 +1,16 @@
+/*media*/
+img, audio, video {
+  width: 100%; height: auto;
+}
+img {
+  @include simple-vendor-prefix(box-sizing,border-box);
+  display: block;
+  border: 1px solid $offWhite;
+}
+audio {}
+video {}
+
+/*Prevents modern browsers from displaying `audio` without controls. Remove excess height in iOS 5 devices.*/
+audio:not([controls]) { display: none; height: 0; }
+
+iframe {margin-bottom: $verticalSpace;}

@@ -1,57 +1,52 @@
 <html lang="en">
 {{> head }}
+
+<!--
+  Load any extra CSS
+  (these are here because of the way metalsmith is building pages)
+-->
+{{#if this.css}}
+  {{#each this.css}}
+  <link rel="stylesheet" type="text/css" href="/css/toys/{{.}}" />
+  {{/each}}
+{{/if}}
+
 <body>
-  {{> header }}
+<!--
+  Load any extra JS
+  (Yeh this is proper dirty but what are you gonna do 🤷🏻‍♀️)
+-->
+{{#if this.js}}
+  {{#each this.js}}
+  <link rel="stylesheet" type="text/css" href="/scripts/{{.}}" />
+  {{/each}}
+{{/if}}
 
-  <div class="container">
-    <header>{{ title }}</header>
 
-    <div class="post-body" itemprop="articleBody">
-      {{{ contents }}}
-    </div>
+<div class="wrapper">
+  {{> nav }}
 
-    <div class="center">
-      {{> share shareText='Share this post'}}
-    </div>
+  <header class="site__header">
+    <h2>Toybox</h2>
+    <h1>{{this.title}}</h1>
+  </header>
 
-    {{> footer }}
+  <div class="toy-info">
+    <button id="toy-info__toggle">Show/Hide Info</button>
+    <section class="toy__details">
+      <p class="toy__date"><time datetime="{{moment this.date 'YYYY-MM-DD' }}">{{moment this.date 'dddd, Do MMMM YYYY' }}</time></p>
+      <p class="toy__sum">{{this.summary}}</p>
+      {{#if this.blog}}{{#each this.blog}}
+      <p class="toy__post"><b>Read more about the process in the supporting blog post:</b> <a href="{{href}}">{{text}}</a></p>
+      {{/each}}{{/if}}
+    </section>
   </div>
 
-  <link rel="stylesheet" href="/css/zenburn.css" async defer>
-  <script type="text/javascript" src="/js/highlight.pack.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script>
-  <script id="twitter-wjs" src="https://platform.twitter.com/widgets.js"></script>
-  <script>
-    var tweets = document.querySelectorAll(".tweet");
-    for(var i=0; i<tweets.length; i++) {
-      var tweet = tweets[i];
-      var id = tweet.getAttribute("tweetID");
+  <div id="toy">
+    {{{contents}}}
+  </div>
 
-      twttr.widgets.createTweet(
-        id, tweet,
-        {
-          conversation : 'none',
-          cards: 'visible',
-          linkColor: '#cc0000',
-          theme: 'light',
-          align: 'center'
-        });
-    }
-
-  </script>
-  <script>
-    // if (navigator.share) {
-    //   [].slice.call(document.querySelectorAll('.share')).forEach(function(shareButton) {
-    //     shareButton.classList.add('show');
-    //     shareButton.addEventListener('click', function(event) {
-    //       event.preventDefault();
-    //       navigator.share({
-    //         title: document.title,
-    //         url: window.location.href
-    //       });
-    //     });
-    //   });
-    // }
-  </script>
+  {{> footer }}
+  </div><!--wrapper-->
 </body>
 </html>

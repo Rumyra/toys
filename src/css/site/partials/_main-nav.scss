@@ -1,0 +1,16 @@
+.site__nav {
+  padding: 0px $gutter;
+  ul {
+    @include clearListStyles();
+    border-bottom: 1px solid $mainCol;
+  	display: flex; justify-content: space-between;
+  }
+  a {
+  	display: inline-block;
+  	padding-bottom: $verticalSpace/2;
+    @extend %smallCaps;
+    text-align: center; line-height:1;
+    color: $mainCol; text-decoration: none;
+    &:hover {text-decoration:underline;}
+  }
+}
