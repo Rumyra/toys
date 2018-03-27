@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dating Stats</title>
+</head>
+<style type="text/css">
+	html, body {margin:0px; padding:0px;}
+	svg {border: 1px solid blue;}
+</style>
+<body>
+
+	<svg></svg>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type="text/javascript" src="stats.js"></script>
+
+<!-- <script type="module">
+	import kit from '../sharedMods/kit.js';
+</script> -->
+
+<script type="text/javascript" src="../sharedMods/kit.js"></script>
+<script defer type="text/javascript">
+
+	const svgEl = document.querySelector('svg');
+	svgEl.style.width = kit.width;
+	svgEl.style.height = kit.height;
+
+	var men = stats.men;
+	const baseRadius = 30;
+	// set radius
+	let radiusScale = d3.scaleLinear().domain([0,1]).range([-5,5]);
+	men.forEach(function(el,i) {
+		let radiusDev = Math.floor( baseRadius + radiusScale(Math.random()) );
+		el.radius = radiusDev;
+	})
+
+	// var unmatch = [];
+	// men.forEach(function(el,i) {
+	// 	console.log(el.quickUnmatch);
+	// 	el.quickUnmatch === true ? unmatch.push(el.quickUnmatch) : false;
+	// })
+
+    // .velocityDecay(0.2)
+
+  function getCol(d) {
+  	// set up colour scale
+  	var colourScale = d3.scaleSequential()
+		  .domain([0, 100])
+		  .interpolator(d3.interpolateRainbow);
+
+		// check platform
+		let baseCol = 50;
+  	if (d.platform === 'Tinder') {
+  		baseCol = 20;
+  	} else if (d.platform === 'okcupid') {
+  		baseCol = 75;
+  	}
+
+  	// make shade based on amount of letters in name - sometimes it's minus, sometimes it's not
+  	let nameLen = Math.random() < 0.5 ? d.name.length*-1 : d.name.length;
+
+  	let colVal = baseCol + nameLen;
+
+  	let col = d3.rgb(colourScale(colVal));
+  	let opCol = col;
+  	opCol.opacity = 0.7;
+
+  	return { opCol, col };
+  }
+
+
+	var force = d3.forceSimulation(men)
+		.force('charge', d3.forceManyBody().strength(6))
+		.force('center', d3.forceCenter(kit.centerX, kit.centerY))
+		// .force("x", d3.forceX().x(function(d) {
+  //   	return d.messaged === true ? kit.width/3 : kit.width/6;
+  //   }))
+		.force('collision', d3.forceCollide().radius(function(d) {return d.radius}))
+
+    // .force("y", d3.forceY().strength(0.001))
+
+    .on("tick", ticked);
+
+  function ticked() {
+   	var vis = d3.select(svgEl)
+			.selectAll('circle')
+			.data(men);
+
+		vis.enter().append('circle')
+			// .transition()
+			// .duration(750)
+			// .delay(0)
+			.attr('fill', function(d) {
+				let fillCol = getCol(d);
+				return fillCol.opCol;
+			}) // get fill colour with getCol()
+			.attr('stroke', function(d) {
+				let fillCol = getCol(d);
+				return fillCol.col;
+			}) // get stroke colour with getCol()
+			.attr('stroke-width', 1)
+			.attr('r', function(d) {return d.radius})
+			.merge(vis)
+			.attr("cx", function(d) { return d.x; })
+	    .attr("cy", function(d) { return d.y; });
+
+	   vis.exit().remove();
+
+	}
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
