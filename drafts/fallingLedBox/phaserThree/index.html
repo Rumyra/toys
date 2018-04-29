@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Phaser v3</title>
+  <script src="phaser.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var config = {
+  type: Phaser.WEBGL,
+  width: 800,
+  height: 600,
+  backgroundColor: '#000',
+  // parent: 'phaser-example',
+  scene: {
+      preload: preload,
+      create: create
+  }
+};
+
+var game = new Phaser.Game(config);
+
+function preload ()
+{
+  // this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
+  this.load.image('led', 'pixel.gif');
+}
+
+function create ()
+{
+    var particles = this.add.particles('led');
+
+    var rect = new Phaser.Geom.Rectangle(100, 100, 600, 400);
+
+    particles.createEmitter({
+        // frame: [ 'red', 'yellow', 'green' ],
+        x: 400, y: 300,
+        lifespan: 4000,
+        speed: { min: 50, max: 75 },
+        // scale: { start: 0.4, end: 0 },
+        gravityY: 150,
+        bounce: 0.6,
+        bounds: rect,
+        blendMode: 'ADD'
+    });
+
+    particles.createEmitter({
+        // frame: 'blue',
+        lifespan: 1000,
+        scale: { start: 0.4, end: 0 },
+        emitZone: { type: 'edge', source: rect, quantity: 60 }
+    });
+}
+
+// window.onload = function() {
+//   var game = new Phaser.Game(600, 600, Phaser.CANVAS, '', { preload: preload, create: create, update: update, render: render });
+
+//   var emitter, // particle system
+//     box, // rectangle
+//     container; // group
+
+//   this.addEventListener("mousedown", function(md) {
+// 	  if (md.which == 1) {
+// 	    lastX = event.pageX;
+// 	    addEventListener("mousemove", moved);
+// 	    md.preventDefault(); // Prevent selection
+// 	  }
+// 	});
+// 	this.addEventListener("mouseup", function(mu) {
+// 		console.log(mu)
+// 		removeEventListener("mousemove", moved);
+// 	}, false)
+
+// 	var lastX; // Tracks the last observed mouse X position
+// 	function moved(event) {
+// 		var dist = event.pageX - lastX;
+// 		console.log(dist);
+// 		game.world.rotation += 0.03;
+// 	 //  var newWidth = Math.max(10, rect.offsetWidth + dist);
+// 	 //  rect.style.width = newWidth + "px";
+// 	 //  lastX = event.pageX;
+
+// 	 console.log(event);
+// 	}
+
+//   function preload () {
+// 		// game.load.baseURL = 'http://examples.phaser.io/assets/';
+// 		// game.load.crossOrigin = 'anonymous';
+// 		game.load.image('particle', 'pixel.gif');
+//   }
+
+//   function create () {
+
+//     // game.physics.startSystem(Phaser.Physics.ARCADE);
+//     // game.world.setBounds(-200,-200,400,400);
+
+//     box = new Phaser.Rectangle(-160,-160,400,400);
+
+//     container = new Phaser.Group(game, box, 'contGroup');
+
+//     emitter = game.add.emitter(game.world.centerX, 0, 88);
+//     // area, bounce, alpha, children, gravity, lifespan(0), maxParticleSpeed,
+//     emitter.makeParticles('particle', 0, 88, true, true);
+//     emitter.width = game.world.width;
+//     // emitter.height = 80;
+
+//     // emitter.setYSpeed(-100, 100);
+// 		// emitter.setXSpeed(-5, 5);
+//     emitter.minParticleSpeed.setTo(-50, 50);
+//     emitter.maxParticleSpeed.setTo(50, 100);
+
+//     emitter.minRotation = 0;
+// 		emitter.maxRotation = 20;
+
+//     emitter.gravity = 180;
+//     emitter.bounce.setTo(0.3, 0.6);
+//     // emitter.lifespan(0);
+//     // emitter.angularDrag = 30;
+
+//     // emitter.alignIn(box, Phaser.CENTER, 20, 20);
+
+//     container.addChild(emitter);
+
+//     // explode, lifespan, frequncy, quantity, forceQuantity
+//     emitter.start(true, 0, 0, 88, 88);
+
+
+//   }
+
+//   function update() {
+//     game.physics.arcade.collide(emitter);
+// 	}
+
+//   function render() {
+//     game.debug.rectangle(box, '#ffffff', false);
+//   }
+
+// };
+
+</script>
+
+</body>
+</html>

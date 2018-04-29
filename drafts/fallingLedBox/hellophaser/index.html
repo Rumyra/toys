@@ -7,8 +7,6 @@
 </head>
 <body>
 
-  <input type="text" name="" />
-
 <script type="text/javascript">
 
 window.onload = function() {
@@ -16,6 +14,7 @@ window.onload = function() {
 
   var emitter, // particle system
     box, // rectangle
+    mask,
     container; // group
 
   this.addEventListener("mousedown", function(md) {
@@ -34,7 +33,8 @@ window.onload = function() {
 	function moved(event) {
 		var dist = event.pageX - lastX;
 		console.log(dist);
-		game.world.rotation += 0.03;
+		mask.angle += 0.03;
+    game.physics.arcade.collide(emitter, mask);
 	 //  var newWidth = Math.max(10, rect.offsetWidth + dist);
 	 //  rect.style.width = newWidth + "px";
 	 //  lastX = event.pageX;
@@ -46,16 +46,22 @@ window.onload = function() {
 		// game.load.baseURL = 'http://examples.phaser.io/assets/';
 		// game.load.crossOrigin = 'anonymous';
 		game.load.image('particle', 'pixel.gif');
+    game.load.image('border', 'border.gif');
   }
 
   function create () {
 
     // game.physics.startSystem(Phaser.Physics.ARCADE);
-    // game.world.setBounds(-200,-200,400,400);
+    game.world.setBounds(-200,-200,400,400);
 
     box = new Phaser.Rectangle(-160,-160,400,400);
 
-    container = new Phaser.Group(game, box, 'contGroup');
+    mask = game.add.sprite(0,100,'border');
+    game.physics.enable(mask, Phaser.Physics.ARCADE);
+    // mask.gravity = 0;
+    mask.body.immovable = true;
+
+
 
     emitter = game.add.emitter(game.world.centerX, 0, 88);
     // area, bounce, alpha, children, gravity, lifespan(0), maxParticleSpeed,
@@ -78,7 +84,16 @@ window.onload = function() {
 
     // emitter.alignIn(box, Phaser.CENTER, 20, 20);
 
-    container.addChild(emitter);
+    // container.addChild(emitter);
+
+    // mask = game.add.graphics(0,0);
+    // mask.beginFill(0xff0000);
+    // mask.drawRect(50, 50, 100, 100);
+    // mask.endFill();
+
+    // container = new Phaser.Group(game, mask, 'contGroup');
+
+    // emitter.mask = mask;
 
     // explode, lifespan, frequncy, quantity, forceQuantity
     emitter.start(true, 0, 0, 88, 88);
@@ -88,6 +103,8 @@ window.onload = function() {
 
   function update() {
     game.physics.arcade.collide(emitter);
+    game.physics.arcade.collide(emitter, mask);
+    // game.physics.arcade.collide(mask);
 	}
 
   function render() {
