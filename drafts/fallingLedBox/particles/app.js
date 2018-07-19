@@ -1,25 +1,36 @@
 import { Kit } from '../../sharedMods/kit.js';
-import { rotate, resolveCollision } from './utilities.js';
+import {  rotate, resolveCollision } from './utilities.js';
+import { createSound } from './sound.js';
 
-var kit = Kit.init();
 
-document.addEventListener('click', function() {
-	console.log(kit.pointerX);
-}, false);
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
 
-window.addEventListener("resize", function() {
-	console.log(kit.width);
-}, false);
+var kit = new Kit(canvas);
+console.log(kit.width);
+
+// document.addEventListener('click', function() {
+// 	console.log(kit.pointerX);
+// }, false);
+
+// window.addEventListener("resize", function() {
+// 	console.log(kit.width);
+// }, false);
 
 // console.log(kit);
 
 // -----------------------------
 
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
+// var c = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// canvas.width = window.innerWidth;
+// canvas.height = window.innerHeight;
+
+// window.addEventListener("resize", function(e) {
+// 	canvas.width = window.innerWidth;
+// 	canvas.height = window.innerHeight;
+// 	init();
+// }, false);
 
 var mouse = {
 	x: 0,
@@ -44,16 +55,12 @@ var colours = [
 	"#7F9D8C"
 ];
 
-window.addEventListener("mousemove", function(e) {
-	mouse.x = e.clientX;
-	mouse.y = e.clientY;
-}, false);
+// window.addEventListener("mousemove", function(e) {
+// 	mouse.x = e.clientX;
+// 	mouse.y = e.clientY;
+// }, false);
 
-window.addEventListener("resize", function(e) {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	init();
-}, false);
+
 
 window.addEventListener("click", function(e) {
 	init();
@@ -109,6 +116,8 @@ const eventManager = {
       .forEach(({ fn }) => fn(payload));
   },
 
+  // have a module that has the function in to call, then call the function
+
   // fire(eventName, data) {
   // 	this.eventsStack.push({ event: eventName, data });
   // },
@@ -144,6 +153,8 @@ function LED(x, y, dy, dx, radius, col) {
 			if (distance(this.x, this.y, leds[i].x, leds[i].y) - (this.radius+leds[i].radius) < 0) {
 				resolveCollision(this, leds[i]);
 				start = performance.now();
+				// console.log(leds[i].radius);
+				createSound(i, leds[i].radius);
 				// play(this, now);
 				// event try
 				// eventManager.fire('hit', this);
